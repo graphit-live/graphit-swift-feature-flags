@@ -10,8 +10,10 @@ public struct FeatureFlags: Sendable {
     /// - Parameter snapshot: The immutable source snapshot to evaluate.
     /// - Throws: `FeatureFlagError` when the snapshot is semantically invalid.
     public init(snapshot: FeatureFlagSnapshot) throws {
+        let valuesByKey = try FeatureFlagValidation.normalizedValues(from: snapshot)
+
         self.snapshot = snapshot
-        self.valuesByKey = [:]
+        self.valuesByKey = valuesByKey
     }
 
     /// Creates an evaluator from resolved feature flag entries.
