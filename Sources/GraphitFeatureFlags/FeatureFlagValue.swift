@@ -1,6 +1,6 @@
 /// A resolved boolean or variant value for a feature flag.
 public struct FeatureFlagValue: Hashable, Codable, Sendable {
-    private enum Storage: Hashable, Codable, Sendable {
+    private enum Storage: Hashable, Sendable {
         case disabled
         case enabled
         case variant(FeatureFlagVariant)
@@ -43,6 +43,47 @@ public struct FeatureFlagValue: Hashable, Codable, Sendable {
             nil
         case .variant(let variant):
             variant
+        }
+    }
+
+    /// Decodes a compact feature flag value from a Boolean or string value.
+    ///
+    /// Boolean `false` decodes as `.disabled`, Boolean `true` decodes as
+    /// `.enabled`, and a string decodes as `.variant(FeatureFlagVariant(string))`.
+    /// Variant text is not semantically validated during decoding.
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+
+        if let boolValue = try? container.decode(Bool.self) {
+            self = boolValue ? .enabled : .disabled
+            return
+        }
+
+        if let stringValue = try? container.decode(String.self) {
+            self = .variant(FeatureFlagVariant(stringValue))
+            return
+        }
+
+        throw DecodingError.typeMismatch(
+            FeatureFlagValue.self,
+            DecodingError.Context(
+                codingPath: decoder.codingPath,
+                debugDescription: "Expected a Boolean or string feature flag value."
+            )
+        )
+    }
+
+    /// Encodes this value as a compact Boolean or string value.
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+
+        switch storage {
+        case .disabled:
+            try container.encode(false)
+        case .enabled:
+            try container.encode(true)
+        case .variant(let variant):
+            try container.encode(variant)
         }
     }
 }
