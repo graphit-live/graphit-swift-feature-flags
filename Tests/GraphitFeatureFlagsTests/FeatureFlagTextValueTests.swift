@@ -53,19 +53,23 @@ struct FeatureFlagTextValueTests {
     }
 
     @Test func constructionAndDecodingDoNotValidateText() throws {
-        let nulText = "bad\u{0000}value"
+        let invalidTexts = [
+            "",
+            "bad\u{0000}value",
+            String(repeating: "x", count: 257)
+        ]
 
-        #expect(FeatureFlagKey("").rawValue == "")
-        #expect(FeatureFlagVariant(nulText).rawValue == nulText)
+        for text in invalidTexts {
+            #expect(FeatureFlagKey(text).rawValue == text)
+            #expect(FeatureFlagVariant(text).rawValue == text)
 
-        let emptyKey = try JSONDecoder().decode(FeatureFlagKey.self, from: Data("\"\"".utf8))
-        let controlVariant = try JSONDecoder().decode(
-            FeatureFlagVariant.self,
-            from: Data(#""bad\u0000value""#.utf8)
-        )
+            let encodedText = try JSONEncoder().encode(text)
+            let decodedKey = try JSONDecoder().decode(FeatureFlagKey.self, from: encodedText)
+            let decodedVariant = try JSONDecoder().decode(FeatureFlagVariant.self, from: encodedText)
 
-        #expect(emptyKey.rawValue == "")
-        #expect(controlVariant.rawValue == nulText)
+            #expect(decodedKey.rawValue == text)
+            #expect(decodedVariant.rawValue == text)
+        }
     }
 }
 
