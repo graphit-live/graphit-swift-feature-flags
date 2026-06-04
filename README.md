@@ -28,7 +28,7 @@ Add this package with Swift Package Manager and depend on the `GraphitFeatureFla
 
 ```swift
 dependencies: [
-    .package(url: "<package-url>", from: "0.1.0")
+    .package(url: "https://github.com/graphit-live/graphit-swift-feature-flags.git", from: "0.1.0")
 ]
 ```
 
