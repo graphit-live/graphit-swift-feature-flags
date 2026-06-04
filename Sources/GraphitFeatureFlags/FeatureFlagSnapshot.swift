@@ -1,4 +1,7 @@
 /// One resolved feature flag entry in a snapshot.
+///
+/// A `FeatureFlag` contains already-resolved data. It does not fetch, refresh,
+/// persist, observe, or track exposure for the flag.
 public struct FeatureFlag: Hashable, Codable, Sendable {
     /// The feature flag key.
     public let key: FeatureFlagKey
@@ -17,6 +20,7 @@ public struct FeatureFlag: Hashable, Codable, Sendable {
     }
 }
 
+/// Convenience factories for constructing resolved feature flag entries.
 public extension FeatureFlag {
     /// Creates a disabled resolved flag entry for `key`.
     ///
@@ -46,11 +50,19 @@ public extension FeatureFlag {
 }
 
 /// An immutable provider-neutral list of resolved feature flags.
+///
+/// A snapshot is data only. It may be decoded from app- or provider-owned
+/// storage and can contain duplicate keys or invalid text until it is validated
+/// by constructing a `FeatureFlags` evaluator.
 public struct FeatureFlagSnapshot: Hashable, Codable, Sendable {
     /// The resolved flags in source order.
     public let flags: [FeatureFlag]
 
     /// Creates a snapshot from resolved flag entries.
+    ///
+    /// This initializer is nonthrowing and does not perform semantic
+    /// validation. Invalid text or duplicate keys are rejected only when
+    /// constructing a `FeatureFlags` evaluator.
     ///
     /// - Parameter flags: The resolved flags in source order.
     public init(_ flags: [FeatureFlag]) {

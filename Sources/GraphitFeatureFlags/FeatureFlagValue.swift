@@ -1,4 +1,9 @@
 /// A resolved boolean or variant value for a feature flag.
+///
+/// Create values with `.disabled`, `.enabled`, or `.variant(_:)`. The type is
+/// intentionally not a public enum so callers use the provided projections
+/// instead of switching over storage details. A variant value always evaluates
+/// as enabled.
 public struct FeatureFlagValue: Hashable, Codable, Sendable {
     private enum Storage: Hashable, Sendable {
         case disabled
@@ -27,6 +32,8 @@ public struct FeatureFlagValue: Hashable, Codable, Sendable {
     }
 
     /// Whether this value evaluates as enabled.
+    ///
+    /// Disabled values return `false`; enabled and variant values return `true`.
     public var isEnabled: Bool {
         switch storage {
         case .disabled:
@@ -74,6 +81,9 @@ public struct FeatureFlagValue: Hashable, Codable, Sendable {
     }
 
     /// Encodes this value as a compact Boolean or string value.
+    ///
+    /// Disabled values encode as `false`, enabled values encode as `true`, and
+    /// variant values encode as their variant string.
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
 
